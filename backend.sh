@@ -8,7 +8,8 @@ R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
-
+echo "please enter db password "
+read mysql_root_password
 
 VALIDATE(){
    if [ $1 -ne 0 ]
@@ -45,3 +46,38 @@ then
 else
     echo -e "expense user already created...$Y skipping $N"
     fi
+
+mkdir -p /app &>>$LOGFILE
+VALIDATE $? "creating app directory"   
+
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+zip
+VALIDATE $? 
+
+cd /app
+unzip /tmp/backend.zip
+VALIDATE $? "extracted backend code"
+
+npm install
+VALIDATE $? "installing nodejs dependencies"
+
+ cp /home/ec2-user/shell-expense/backend.service /etc/systemd/system/backend.service
+VALIDATE $? "copied backend service "
+
+systemctl daemon-reload
+VALIDATE $? " daemon reload"
+
+systemctl start backend
+VALIDATE $? "starting backend "
+
+systemctl enable backend
+VALIDATE $? "enabling backend"
+ 
+ dnf install mysql -y 
+validate $? "installing mysql client"
+
+mysql -h <> -uroot -p${mysql_root_password} < /app/schema/backend.sql
+VALIDATE $? "schema loading" 
+
+systemctl restart backend 
+VALIDATE $? "restarting backend "
