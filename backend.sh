@@ -55,29 +55,29 @@ zip
 VALIDATE $? 
 
 cd /app
-unzip /tmp/backend.zip
+unzip /tmp/backend.zip &>>$LOGFILE
 VALIDATE $? "extracted backend code"
 
-npm install
+npm install &>>$LOGFILE
 VALIDATE $? "installing nodejs dependencies"
 
- cp /home/ec2-user/shell-expense/backend.service /etc/systemd/system/backend.service
+ cp /home/ec2-user/shell-expense/backend.service /etc/systemd/system/backend.service &>>$LOGFILE
 VALIDATE $? "copied backend service "
 
-systemctl daemon-reload
+systemctl daemon-reload &>>$LOGFILE
 VALIDATE $? " daemon reload"
 
-systemctl start backend
+systemctl start backend &>>$LOGFILE
 VALIDATE $? "starting backend "
 
-systemctl enable backend
+systemctl enable backend &>>$LOGFILE
 VALIDATE $? "enabling backend"
  
- dnf install mysql -y 
+ dnf install mysql -y  &>>$LOGFILE
 validate $? "installing mysql client"
 
-mysql -h <> -uroot -p${mysql_root_password} < /app/schema/backend.sql
+mysql -h <> -uroot -p${mysql_root_password} < /app/schema/backend.sql &>>$LOGFILE
 VALIDATE $? "schema loading" 
 
-systemctl restart backend 
+systemctl restart backend &>>$LOGFILE
 VALIDATE $? "restarting backend "
